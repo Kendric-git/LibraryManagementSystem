@@ -1,0 +1,41 @@
+@LibraryManagementSystem_HostAddress = http://localhost:5169
+
+### Get All Books
+GET {{LibraryManagementSystem_HostAddress}}/api/Book
+Accept: application/json
+
+### Get Book by Id
+GET {{LibraryManagementSystem_HostAddress}}/api/Book/1
+Accept: application/json
+### Create a new book
+POST {{LibraryManagementSystem_HostAddress}}/api/Book
+Content-Type: application/json
+
+{
+  "name": "The Great Gatsby",
+  "author": "F. Scott Fitzgerald",
+  "genreId": 3,
+  "price": 9.99,
+  "stock": 5
+}
+
+### Update Book
+PUT {{LibraryManagementSystem_HostAddress}}/api/Book/1
+Content-Type: application/json
+
+{
+    "name": "Project Hail Mary",
+    "author": "Andy Weir",
+    "genreId": 1,
+    "price": 44.99,
+    "stock": 4
+}
+
+### Delete Book
+DELETE {{LibraryManagementSystem_HostAddress}}/api/Book/2
+
+### Get All Genres
+GET {{LibraryManagementSystem_HostAddress}}/api/Genre
+Accept: application/json
+
+### Get All Book Copies

@@ -1,0 +1,55 @@
+# macOs / Windows
+.DS_Store
+Thumbs.db
+
+# .NET build output
+bin/
+obj/
+artifacts/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/settings.json
+*.code-workspace
+
+# Test Outpout/Coverage
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+coverage/
+coverage-*/
+coverage.json
+coverage.xml
+
+# Logs
+*.log
+
+# Local Sql Session
+*.session.sql
+
+# Local Config and Secrets
+.env
+.env.*
+!.env.example
+**/appsettings.Local.json
+**/appsettings.*.Local.json
+
+# Local Certifications and Keys
+*.pfx
+*.p12
+*.key
+
+# Local Databade Volumes
+postgres-data/
+.postgres-data/
+
+# React / Node build Output
+
+# Node Logs
