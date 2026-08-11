@@ -28,7 +28,7 @@ The API separates controllers, services, DTOs, data models, and database access.
 
 ## Current Development
 
-BookCopy inventory management is currently being implemented. The existing Stock property will eventually be replaced by copy counts calculated from individual BookCopy records.
+BookCopy inventory management has now been implemented. The existing Stock property will is replaced by copy counts calculated from individual BookCopy records. The tests are now being refactored/developed to match the new records.
 
 ## Planned Features
 

@@ -3,17 +3,20 @@ using System;
 using LibraryManagementSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace LibraryManagementSystem.Migrations
+namespace LibraryManagementSystem.Data.Migrations
 {
     [DbContext(typeof(LibrarySystemContext))]
-    partial class LibrarySystemContextModelSnapshot : ModelSnapshot
+    [Migration("20260811211849_RemoveBookStock")]
+    partial class RemoveBookStock
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

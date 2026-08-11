@@ -38,4 +38,19 @@ DELETE {{LibraryManagementSystem_HostAddress}}/api/Book/2
 GET {{LibraryManagementSystem_HostAddress}}/api/Genre
 Accept: application/json
 
-### Get All Book Copies
+### Get All Book Copies by BookId
+GET {{LibraryManagementSystem_HostAddress}}/api/BookCopy/book/1
+Accept: application/json
+
+### Get Copy by CopyId
+GET {{LibraryManagementSystem_HostAddress}}/api/BookCopy/1
+Accept: application/json
+
+### Add Book Copy
+POST {{LibraryManagementSystem_HostAddress}}/api/BookCopy/book/1
+Content-Type: application/json
+
+{
+  "inventorycode": "COPY-001",
+  "condition": "Good"
+}

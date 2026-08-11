@@ -30,13 +30,22 @@ public sealed class BookServiceTests
                 Id = 1,
                 Name = "Science Fiction"
             };
+        var seededFirstBookCopy = new BookCopy
+            {
+                InventoryCode = "COPY-001",
+                Condition = BookCopyCondition.Good
+            };
+        var seededSecondBookCopy = new BookCopy
+            {
+                InventoryCode = "COPY-002",
+                Condition = BookCopyCondition.Good
+            };
         var firstBook = new Book
             {
                 Name = "Project Hail Mary",
                 Author = "Andy Weir",
                 GenreId = seededGenre.Id,
-                Price = 34.99m,
-                Stock = 5 
+                Price = 34.99m, 
             };
         var secondBook = new Book
             {
@@ -44,8 +53,10 @@ public sealed class BookServiceTests
                 Author = "Jane Doe",
                 GenreId = seededGenre.Id,
                 Price = 24.99m,
-                Stock = 5
             };
+
+        firstBook.Copies.Add(seededFirstBookCopy);
+        secondBook.Copies.Add(seededSecondBookCopy);
 
         await using (var seedContext = _fixture.CreateDbContext()){
             seedContext.Genres.Add(seededGenre);
@@ -53,7 +64,6 @@ public sealed class BookServiceTests
             seedContext.Books.Add(secondBook);
 
             await seedContext.SaveChangesAsync();
-
         }
 
         // Act
@@ -74,13 +84,13 @@ public sealed class BookServiceTests
         Assert.Equal(firstBook.Author, firstBookSummary.Author);
         Assert.Equal(seededGenre.Name, firstBookSummary.GenreName);
         Assert.Equal(firstBook.Price, firstBookSummary.Price);
-        Assert.Equal(firstBook.Stock, firstBookSummary.Stock);
+        Assert.Equal(1, firstBookSummary.ActiveCopyCount);
 
         Assert.Equal(secondBook.Name, secondBookSummary.Name);
         Assert.Equal(secondBook.Author, secondBookSummary.Author);
         Assert.Equal(seededGenre.Name, secondBookSummary.GenreName);
         Assert.Equal(secondBook.Price, secondBookSummary.Price);
-        Assert.Equal(secondBook.Stock, secondBookSummary.Stock);
+        Assert.Equal(1, secondBookSummary.ActiveCopyCount);
     }
 
     [Fact]
@@ -121,8 +131,7 @@ public sealed class BookServiceTests
                 "Project Hail Mary",
                 "Andy Weir",
                 seededGenre.Id,
-                34.99m,
-                5
+                34.99m
             );
 
         await using (var seedContext = _fixture.CreateDbContext())
@@ -143,6 +152,12 @@ public sealed class BookServiceTests
             .AsNoTracking()
             .SingleAsync();
 
+        var activeCopyCount = await verificationContext.BookCopies
+            .CountAsync(copy =>
+                copy.BookId == savedBook.Id &&
+                copy.RetiredAt == null
+                );
+
         // Assert
         Assert.Equal(CreateBookStatus.Created, result.Status);
         Assert.NotNull(result.Book);
@@ -151,13 +166,13 @@ public sealed class BookServiceTests
         Assert.Equal(request.Author, result.Book.Author);
         Assert.Equal(request.GenreId, result.Book.Genre.Id);
         Assert.Equal(request.Price, result.Book.Price);
-        Assert.Equal(request.Stock, result.Book.Stock);
+        Assert.Equal(0, result.Book.ActiveCopyCount);
 
         Assert.Equal(request.Name, savedBook.Name);
         Assert.Equal(request.Author, savedBook.Author);
         Assert.Equal(request.GenreId, savedBook.GenreId);
         Assert.Equal(request.Price, savedBook.Price);
-        Assert.Equal(request.Stock, savedBook.Stock);
+        Assert.Equal(0, activeCopyCount);
     }
     
     [Fact]
@@ -175,8 +190,7 @@ public sealed class BookServiceTests
             "Project Hail Mary",
             "Andy Weir",
             999,
-            34.99m,
-            5
+            34.99m
         );
         
         // Act
@@ -210,8 +224,7 @@ public sealed class BookServiceTests
             Name = "Project Hail Mary",
             Author = "Andy Weir",
             GenreId = seededGenre.Id,
-            Price = 34.99m,
-            Stock = 5 
+            Price = 34.99m
         };
 
         var seededSecondBook = new Book
@@ -219,8 +232,7 @@ public sealed class BookServiceTests
             Name = "Star Trek",
             Author = "Jane Doe",
             GenreId = seededGenre.Id,
-            Price = 24.99m,
-            Stock = 5
+            Price = 24.99m
         };
 
         await using (var seedContext = _fixture.CreateDbContext())
@@ -248,7 +260,7 @@ public sealed class BookServiceTests
         Assert.Equal(seededGenre.Id, result.Genre.Id);
         Assert.Equal(seededGenre.Name, result.Genre.Name);
         Assert.Equal(seededFirstBook.Price, result.Price);
-        Assert.Equal(seededFirstBook.Stock, result.Stock);
+        Assert.Equal(0, result.ActiveCopyCount);
     }
 
     [Fact]
@@ -272,7 +284,6 @@ public sealed class BookServiceTests
             Author = "Andy Weir",
             GenreId = seededGenre.Id,
             Price = 34.99m,
-            Stock = 5 
         };
 
         await using (var seedContext = _fixture.CreateDbContext())
@@ -320,8 +331,7 @@ public sealed class BookServiceTests
             Name = "Project Hail Mary",
             Author = "Andy Weir",
             GenreId = seededFirstGenre.Id,
-            Price = 34.99m,
-            Stock = 5 
+            Price = 34.99m
         };
 
         var seededSecondBook = new Book
@@ -329,8 +339,7 @@ public sealed class BookServiceTests
             Name = "Star Trek",
             Author = "Jane Doe",
             GenreId = seededFirstGenre.Id,
-            Price = 24.99m,
-            Stock = 5
+            Price = 24.99m
         };
 
         var request = new UpdateBookDto
@@ -338,8 +347,7 @@ public sealed class BookServiceTests
                 "It Ends With Us",
                 "Colleen Hoover",
                 seededSecondGenre.Id,
-                24.99m,
-                10
+                24.99m
             );
 
         await using (var seedContext = _fixture.CreateDbContext())
@@ -371,6 +379,18 @@ public sealed class BookServiceTests
             .AsNoTracking()
             .SingleAsync(book => book.Id == seededSecondBook.Id);
 
+        var updatedBookActiveCopyCount = await verificationContext.BookCopies
+            .CountAsync(copy =>
+                copy.BookId == updatedBook.Id &&
+                copy.RetiredAt == null
+                );
+        
+        var unchangedBookActiveCopyCount = await verificationContext.BookCopies
+            .CountAsync(copy =>
+                copy.BookId == unchangedBook.Id &&
+                copy.RetiredAt == null
+                );
+
         // Assert
         Assert.Equal(UpdateBookStatus.Updated, updateStatus);
 
@@ -378,13 +398,13 @@ public sealed class BookServiceTests
         Assert.Equal(request.Author, updatedBook.Author);
         Assert.Equal(request.GenreId, updatedBook.GenreId);
         Assert.Equal(request.Price, updatedBook.Price);
-        Assert.Equal(request.Stock, updatedBook.Stock);
+        Assert.Equal(0, updatedBookActiveCopyCount);
 
         Assert.Equal(seededSecondBook.Name, unchangedBook.Name);
         Assert.Equal(seededSecondBook.Author, unchangedBook.Author);
         Assert.Equal(seededSecondBook.GenreId, unchangedBook.GenreId);
         Assert.Equal(seededSecondBook.Price, unchangedBook.Price);
-        Assert.Equal(seededSecondBook.Stock, unchangedBook.Stock);
+        Assert.Equal(0, unchangedBookActiveCopyCount);
     }
 
     [Fact]
@@ -406,8 +426,7 @@ public sealed class BookServiceTests
             Name = "Project Hail Mary",
             Author = "Andy Weir",
             GenreId = seededFirstGenre.Id,
-            Price = 34.99m,
-            Stock = 5 
+            Price = 34.99m
         };
 
         var request = new UpdateBookDto
@@ -415,8 +434,7 @@ public sealed class BookServiceTests
                 "It Ends With Us",
                 "Colleen Hoover",
                 999,
-                24.99m,
-                10
+                24.99m
             );
 
         await using (var seedContext = _fixture.CreateDbContext())
@@ -440,6 +458,12 @@ public sealed class BookServiceTests
         var unchangedBook = await verificationContext.Books
             .AsNoTracking()
             .SingleAsync(book => book.Id == seededFirstBook.Id);
+        
+        var unchangedBookActiveCopyCount = await verificationContext.BookCopies
+            .CountAsync(copy =>
+                copy.BookId == unchangedBook.Id &&
+                copy.RetiredAt == null
+                );
 
         // Assert
         Assert.Equal(UpdateBookStatus.GenreNotFound, updateStatus);
@@ -448,7 +472,7 @@ public sealed class BookServiceTests
         Assert.Equal(seededFirstBook.Author, unchangedBook.Author);
         Assert.Equal(seededFirstBook.GenreId, unchangedBook.GenreId);
         Assert.Equal(seededFirstBook.Price, unchangedBook.Price);
-        Assert.Equal(seededFirstBook.Stock, unchangedBook.Stock);
+        Assert.Equal(0, unchangedBookActiveCopyCount);
     }
 
     [Fact]
@@ -470,8 +494,7 @@ public sealed class BookServiceTests
             Name = "Project Hail Mary",
             Author = "Andy Weir",
             GenreId = seededFirstGenre.Id,
-            Price = 34.99m,
-            Stock = 5 
+            Price = 34.99m
         };
 
         var request = new UpdateBookDto
@@ -479,8 +502,7 @@ public sealed class BookServiceTests
                 "It Ends With Us",
                 "Colleen Hoover",
                 seededFirstGenre.Id,
-                24.99m,
-                10
+                24.99m
             );
 
         await using (var seedContext = _fixture.CreateDbContext())
@@ -504,6 +526,12 @@ public sealed class BookServiceTests
         var unchangedBook = await verificationContext.Books
             .AsNoTracking()
             .SingleAsync(book => book.Id == seededFirstBook.Id);
+        
+        var unchangedBookActiveCopyCount = await verificationContext.BookCopies
+            .CountAsync(copy =>
+                copy.BookId == unchangedBook.Id &&
+                copy.RetiredAt == null
+                );
 
         // Assert
         Assert.Equal(UpdateBookStatus.BookNotFound, updateStatus);
@@ -512,7 +540,7 @@ public sealed class BookServiceTests
         Assert.Equal(seededFirstBook.Author, unchangedBook.Author);
         Assert.Equal(seededFirstBook.GenreId, unchangedBook.GenreId);
         Assert.Equal(seededFirstBook.Price, unchangedBook.Price);
-        Assert.Equal(seededFirstBook.Stock, unchangedBook.Stock);
+        Assert.Equal(0, unchangedBookActiveCopyCount);
     }
 
     [Fact]
@@ -534,8 +562,7 @@ public sealed class BookServiceTests
             Name = "Project Hail Mary",
             Author = "Andy Weir",
             GenreId = seededFirstGenre.Id,
-            Price = 34.99m,
-            Stock = 5 
+            Price = 34.99m
         };
 
         var seededSecondBook = new Book
@@ -543,8 +570,7 @@ public sealed class BookServiceTests
             Name = "Star Trek",
             Author = "Jane Doe",
             GenreId = seededFirstGenre.Id,
-            Price = 24.99m,
-            Stock = 5
+            Price = 24.99m
         };
 
         await using (var seedContext = _fixture.CreateDbContext())
@@ -599,8 +625,7 @@ public sealed class BookServiceTests
             Name = "Project Hail Mary",
             Author = "Andy Weir",
             GenreId = seededFirstGenre.Id,
-            Price = 34.99m,
-            Stock = 5 
+            Price = 34.99m
         };
 
         await using (var seedContext = _fixture.CreateDbContext())
@@ -626,12 +651,18 @@ public sealed class BookServiceTests
             .AsNoTracking()
             .SingleAsync(book => book.Id == seededFirstBook.Id);
         
+        var unchangedBookActiveCopyCount = await verificationContext.BookCopies
+            .CountAsync(copy =>
+                copy.BookId == unchangedBook.Id &&
+                copy.RetiredAt == null
+                );
+        
         Assert.False(result);
 
         Assert.Equal(seededFirstBook.Name, unchangedBook.Name);
         Assert.Equal(seededFirstBook.Author, unchangedBook.Author);
         Assert.Equal(seededFirstBook.GenreId, unchangedBook.GenreId);
         Assert.Equal(seededFirstBook.Price, unchangedBook.Price);
-        Assert.Equal(seededFirstBook.Stock, unchangedBook.Stock);
+        Assert.Equal(0, unchangedBookActiveCopyCount);
     }
 }

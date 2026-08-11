@@ -4,6 +4,6 @@ namespace LibraryManagementSystem.Dtos;
 
 public record CreateBookCopyDto 
 (
-    [Required] string InventoryCode,
-    [Required] string Condition
+    [Required][StringLength(50)]  string InventoryCode,
+    [Required][StringLength(20)]  string Condition
 );

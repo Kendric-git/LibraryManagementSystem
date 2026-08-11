@@ -36,8 +36,7 @@ public class BookControllerTests
             "Project Hail Mary",
             "Andy Weir",
             1,
-            34.99m,
-            5
+            34.99m
         );
     }
 
@@ -48,8 +47,7 @@ public class BookControllerTests
             "Project Hail Mary",
             "Andy Weir",
             1,
-            29.99m,
-            7
+            29.99m
         );
     }
 

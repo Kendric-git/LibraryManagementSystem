@@ -7,5 +7,5 @@ public sealed record BookSummaryDto
     string Author,
     string GenreName,
     decimal Price,
-    int Stock
+    int ActiveCopyCount
 );

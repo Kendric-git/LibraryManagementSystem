@@ -8,6 +8,5 @@ public class Book
     public Genre? Genre { get; set; }
     public int GenreId { set; get; }
     public decimal Price { get; set; }
-    public int Stock { get; set; }
     public ICollection<BookCopy> Copies { get; set; } = new List<BookCopy>();
 }

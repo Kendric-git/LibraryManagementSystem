@@ -17,7 +17,7 @@ public sealed class BookService(LibrarySystemContext dbContext) : IBookService
                 book.Author,
                 book.Genre!.Name,
                 book.Price,
-                book.Stock
+                book.Copies.Count(copy => copy.RetiredAt == null)
             ))
             .ToListAsync(cancellationToken);
     }
@@ -32,7 +32,7 @@ public sealed class BookService(LibrarySystemContext dbContext) : IBookService
                 book.Author,
                 new GenreDto(book.GenreId, book.Genre!.Name),
                 book.Price,
-                book.Stock
+                book.Copies.Count(copy => copy.RetiredAt == null)
             ))
             .SingleOrDefaultAsync(cancellationToken);
     }
@@ -56,7 +56,6 @@ public sealed class BookService(LibrarySystemContext dbContext) : IBookService
             Author = newBook.Author,
             GenreId = newBook.GenreId,
             Price = newBook.Price,
-            Stock = newBook.Stock
         };
 
         dbContext.Books.Add(book);
@@ -69,7 +68,7 @@ public sealed class BookService(LibrarySystemContext dbContext) : IBookService
             book.Author,
             new GenreDto(genre.Id, genre.Name),
             book.Price,
-            book.Stock
+            book.Copies.Count(copy => copy.RetiredAt == null)
         );
 
         return new CreateBookResult(CreateBookStatus.Created, createdBook);
@@ -99,7 +98,6 @@ public sealed class BookService(LibrarySystemContext dbContext) : IBookService
         existingBook.Author = updateBook.Author;
         existingBook.GenreId = updateBook.GenreId;
         existingBook.Price = updateBook.Price;
-        existingBook.Stock = updateBook.Stock;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

@@ -7,6 +7,5 @@ public record UpdateBookDto
     [Required][StringLength(50)] string Name,
     [Required][StringLength(50)] string Author,
     [Range(1, int.MaxValue)] int GenreId,
-    [Range(typeof(decimal), "0.01", "10000")] decimal Price,
-    [Range(0, int.MaxValue)] int Stock
+    [Range(typeof(decimal), "0.01", "10000")] decimal Price
 );
