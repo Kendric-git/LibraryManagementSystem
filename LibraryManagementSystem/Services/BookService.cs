@@ -55,7 +55,7 @@ public sealed class BookService(LibrarySystemContext dbContext) : IBookService
             Name = newBook.Name,
             Author = newBook.Author,
             GenreId = newBook.GenreId,
-            Price = newBook.Price,
+            Price = newBook.Price
         };
 
         dbContext.Books.Add(book);

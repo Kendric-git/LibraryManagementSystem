@@ -15,8 +15,7 @@ Content-Type: application/json
   "name": "The Great Gatsby",
   "author": "F. Scott Fitzgerald",
   "genreId": 3,
-  "price": 9.99,
-  "stock": 5
+  "price": 9.99
 }
 
 ### Update Book
@@ -27,8 +26,7 @@ Content-Type: application/json
     "name": "Project Hail Mary",
     "author": "Andy Weir",
     "genreId": 1,
-    "price": 44.99,
-    "stock": 4
+    "price": 44.99
 }
 
 ### Delete Book
@@ -43,14 +41,14 @@ GET {{LibraryManagementSystem_HostAddress}}/api/BookCopy/book/1
 Accept: application/json
 
 ### Get Copy by CopyId
-GET {{LibraryManagementSystem_HostAddress}}/api/BookCopy/1
+GET {{LibraryManagementSystem_HostAddress}}/api/BookCopy/4
 Accept: application/json
 
 ### Add Book Copy
-POST {{LibraryManagementSystem_HostAddress}}/api/BookCopy/book/1
+POST {{LibraryManagementSystem_HostAddress}}/api/BookCopy/book/3
 Content-Type: application/json
 
 {
-  "inventorycode": "COPY-001",
-  "condition": "Good"
+  "inventorycode": "COPY-3-001",
+  "condition": "New"
 }

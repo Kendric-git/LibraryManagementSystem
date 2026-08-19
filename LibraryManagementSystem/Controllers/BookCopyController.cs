@@ -20,16 +20,11 @@ namespace LibraryManagementSystem
         {
             var bookCopies = await _bookCopyService.GetBookCopiesByBookIdAsync(bookId, cancellationToken);
 
-            if (bookCopies is null)
-            {
-                return NotFound();
-            }
-
             return Ok(bookCopies);
         }
 
         [HttpGet("{copyId:int}")]
-        public async Task<ActionResult<BookCopyDto>> GetBookCopyByIdAsync(int copyId, CancellationToken cancellationToken)
+        public async Task<ActionResult<BookCopyDto>> GetBookCopyById(int copyId, CancellationToken cancellationToken)
         {
             var bookCopy = await _bookCopyService.GetBookCopyByIdAsync(copyId, cancellationToken);
 
@@ -78,7 +73,7 @@ namespace LibraryManagementSystem
 
             var createdCopy = result.BookCopy;
 
-            return CreatedAtAction(nameof(GetBookCopyByIdAsync), new { copyId = createdCopy?.Id }, createdCopy);
+            return CreatedAtAction(nameof(GetBookCopyById), new { copyId = createdCopy?.Id }, createdCopy);
         }
     }
 }
